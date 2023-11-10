@@ -1,4 +1,4 @@
-package ru.netology;
+package ru.netology.server;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -18,11 +18,12 @@ public class Server {
             "/styles.css", "/app.js", "/links.html", "/forms.html", "/classic.html", "/events.html", "/events.js");
     private final ExecutorService threadPool = Executors.newFixedThreadPool(64);
 
-    public void listen (int port) {
+    public void listen(int port) {
+
         try (final var serverSocket = new ServerSocket(port)) {
-            Runnable logic = () -> awaitConnection(serverSocket);
             while (true) {
-                threadPool.submit(logic);
+                final var socket = serverSocket.accept();
+                threadPool.submit(() -> awaitConnection(socket));
             }
         } catch (IOException e) {
             threadPool.shutdown();
@@ -30,12 +31,13 @@ public class Server {
         }
     }
 
-    public void awaitConnection (ServerSocket serverSocket) {
+    public void awaitConnection(Socket socket) {
         try (
-                final var socket = serverSocket.accept();
+//                final var socket = serverSocket.accept();
                 final var in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                final var out = new BufferedOutputStream(socket.getOutputStream());
+                final var out = new BufferedOutputStream(socket.getOutputStream())
         ) {
+            System.out.println(Thread.currentThread());
             // read only request line for simplicity
             // must be in form GET /path HTTP/1.1
             final var requestLine = in.readLine();
