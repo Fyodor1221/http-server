@@ -1,14 +1,13 @@
 package ru.netology.server;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class Request {
     private String method;
     private String path;
     private String protocol;
-    private Map<String, String> headers = new HashMap<>();
+    private final List<String> headers = new ArrayList<>();
     private String body = null;
 
     public String getMethod() {
@@ -23,7 +22,7 @@ public class Request {
         return protocol;
     }
 
-    public Map<String, String> getHeaders() {
+    public List<String> getHeaders() {
         return headers;
     }
 
@@ -46,8 +45,8 @@ public class Request {
         return this;
     }
 
-    public Request addHeader(String headerType, String headerValue) {
-        this.headers.put(headerType, headerValue);
+    public Request addHeader(String header) {
+        this.headers.add(header);
         return this;
     }
 
@@ -58,14 +57,9 @@ public class Request {
 
     @Override
     public String toString() {
-        List<String> headerList = null;
-        for (String headerType : headers.keySet()) {
-            headerList.add(headerType + ": " + headers.get(headerType) + '\n');
-        }
-        return "Request{\n" +
-                method + " " + path + " " + protocol + '\n' +
-                "headers\n" + headerList + '\n' +
-                "body" + body +
+        return method + " " + path + " " + protocol + '\n' +
+                "headers:\n" + headers + '\n' +
+                "body:\n" + body + '\n' +
                 '}';
     }
 }
