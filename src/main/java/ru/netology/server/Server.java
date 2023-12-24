@@ -49,7 +49,6 @@ public class Server {
                 out.flush();
                 socket.close();
             }
-            System.out.println("Parsed request:");
             System.out.println(request.toString());
 
             handlers.get(request.getMethod()).get(request.getPath()).handle(request, out);
@@ -66,19 +65,23 @@ public class Server {
         if (parts.length != 3) {
             throw new IOException("Incorrect request line");
         }
-        if (!validPaths.contains(parts[1])) {
+
+        request.setMethod(parts[0]);
+        request.setProtocol(parts[2]);
+
+        if (parts[1].contains("?")) {
+            var url = parts[1].split("\\?");
+            request.setPath(url[0]);
+            request.addQueryParams(URLEncodedUtils.parse(url[1], StandardCharsets.UTF_8));
+        } else {
+            request.setPath(parts[1]);
+        }
+
+        if (!validPaths.contains(request.getPath())) {
             throw new IOException("HTTP/1.1 404 Not Found\r\n" +
                     "Content-Length: 0\r\n" +
                     "Connection: close\r\n" +
                     "\r\n");
-        }
-        request.setMethod(parts[0]);
-        request.setProtocol(parts[2]);
-
-        var url = parts[1].split("\\?");
-        request.setPath(url[0]);
-        if (parts[1].contains("?")) {
-            request.addQueryParams(URLEncodedUtils.parse(url[1], StandardCharsets.UTF_8));
         }
 
         String nextLine;

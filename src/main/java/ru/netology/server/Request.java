@@ -73,10 +73,12 @@ public class Request {
 
     @Override
     public String toString() {
-        return method + " " + path + " " + protocol + '\n' +
-                "queryParams" + queryParams +
-                "headers:\n" + headers + '\n' +
-                "body:\n" + body + '\n' +
-                '}';
+        return "method: " + method + '\n' +
+                "path: " + path + '\n' +
+                "protocol: " + protocol + '\n' +
+                "queryParams: " + queryParams + '\n' +
+                "headers: " + headers + '\n' +
+                "body: " + body + '\n' +
+                "------------";
     }
 }
