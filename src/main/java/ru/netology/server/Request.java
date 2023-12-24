@@ -1,5 +1,7 @@
 package ru.netology.server;
 
+import org.apache.http.NameValuePair;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,6 +10,7 @@ public class Request {
     private String path;
     private String protocol;
     private final List<String> headers = new ArrayList<>();
+    private final List<NameValuePair> queryParams = new ArrayList<>();
     private String body = null;
 
     public String getMethod() {
@@ -30,34 +33,48 @@ public class Request {
         return body;
     }
 
-    public Request setMethod(String method) {
+    public List<NameValuePair> getQueryParams() {
+        return queryParams;
+    }
+
+    public List<NameValuePair> getQueryParam(String name) {
+        var params = new ArrayList<NameValuePair>();
+        for (NameValuePair param : queryParams) {
+            if (param.getName().equals(name)) {
+                params.add(param);
+            }
+        }
+        return params;
+    }
+
+    public void setMethod(String method) {
         this.method = method;
-        return this;
     }
 
-    public Request setPath(String path) {
+    public void setPath(String path) {
         this.path = path;
-        return this;
     }
 
-    public Request setProtocol(String protocol) {
+    public void setProtocol(String protocol) {
         this.protocol = protocol;
-        return this;
     }
 
-    public Request addHeader(String header) {
+    public void addHeader(String header) {
         this.headers.add(header);
-        return this;
     }
 
-    public Request setBody(String body) {
+    public void addQueryParams(List<NameValuePair> pairList) {
+        this.queryParams.addAll(pairList);
+    }
+
+    public void setBody(String body) {
         this.body = body;
-        return this;
     }
 
     @Override
     public String toString() {
         return method + " " + path + " " + protocol + '\n' +
+                "queryParams" + queryParams +
                 "headers:\n" + headers + '\n' +
                 "body:\n" + body + '\n' +
                 '}';

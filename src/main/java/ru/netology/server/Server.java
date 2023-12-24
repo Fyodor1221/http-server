@@ -1,6 +1,6 @@
 package ru.netology.server;
 
-//import org.apache.http.Header;
+import org.apache.http.client.utils.URLEncodedUtils;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -72,8 +73,13 @@ public class Server {
                     "\r\n");
         }
         request.setMethod(parts[0]);
-        request.setPath(parts[1]);
         request.setProtocol(parts[2]);
+
+        var url = parts[1].split("\\?");
+        request.setPath(url[0]);
+        if (parts[1].contains("?")) {
+            request.addQueryParams(URLEncodedUtils.parse(url[1], StandardCharsets.UTF_8));
+        }
 
         String nextLine;
         while (true) {
@@ -87,7 +93,6 @@ public class Server {
         if (!request.getMethod().equals("GET")) {
             request.setBody(in.readLine());
         }
-
         return request;
     }
 
