@@ -9,6 +9,8 @@ import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -22,7 +24,7 @@ public class Server {
     private static final ConcurrentMap<String, ConcurrentMap<String, Handler>> handlers = new ConcurrentHashMap<>();
 
     public void listen(int port) {
-        System.out.println("Current Handlers: \n" + handlers);
+//        System.out.println("Current Handlers: \n" + handlers);
         try (final var serverSocket = new ServerSocket(port)) {
             while (true) {
                 final var socket = serverSocket.accept();
@@ -40,11 +42,21 @@ public class Server {
                 final var out = new BufferedOutputStream(socket.getOutputStream())
         ) {
             System.out.println(Thread.currentThread());
+//            System.out.println("Reading request...");
+//            String line;
+//            while ((line = in.readLine()) != null) {
+//                System.out.println(line);
+//            }
+//            while (in.ready()) {
+//                System.out.println(in.readLine());
+//            }
+//            System.out.println("Request has been read");
             System.out.println("Parsing request...");
             Request request = new Request();
             try {
                 request = parseRequest(in, request);
             } catch (IOException e) {
+                e.printStackTrace();
                 out.write(e.getMessage().getBytes());
                 out.flush();
                 socket.close();
@@ -61,6 +73,7 @@ public class Server {
     public Request parseRequest(BufferedReader in, Request request) throws IOException {
         final var requestLine = in.readLine();
         final var parts = requestLine.split(" ");
+        System.out.println(Arrays.toString(parts));
         // must be in form GET /path HTTP/1.1
         if (parts.length != 3) {
             throw new IOException("Incorrect request line");
@@ -85,17 +98,56 @@ public class Server {
         }
 
         String nextLine;
+        var headers = new ArrayList<String>();
         while (true) {
             nextLine = in.readLine();
             if (nextLine.equals("")) {
                 break;
             }
+            headers.add(nextLine);
             request.addHeader(nextLine);
         }
+        System.out.println(headers);
 
-        if (!request.getMethod().equals("GET")) {
-            request.setBody(in.readLine());
+//        StringBuilder body = new StringBuilder();
+//        while ((line = in.readLine()) != null) {
+//            System.out.println("reading body...");
+//            body.append(line);
+//            request.setBody(body.toString());
+//        }
+
+//        if (in.ready()) {
+//            System.out.println("We have a body");
+//            request.setBody(in.readLine());
+//        }
+//        else {
+//            System.out.println("We don't have a body");
+//        }
+
+//        if (in.ready()) {
+//            StringBuilder bodyBuilder = new StringBuilder();
+//            char[] cbuf = new char[4096];
+//            while (in.read(cbuf) > 0) {
+//                bodyBuilder.append(cbuf);
+//                System.out.println(bodyBuilder);
+//            }
+//            request.setBody(bodyBuilder.toString());
+//        }
+
+        if (in.ready()) {
+            System.out.println("yes body");
+            StringBuilder bodyBuilder = new StringBuilder();
+            int ch;
+            while ((ch = in.read()) > 0) {
+                bodyBuilder.append((char)ch);
+                System.out.println(bodyBuilder);
+            }
+            request.setBody(bodyBuilder.toString());
         }
+        else {
+            System.out.println("no body");
+        }
+
         return request;
     }
 
